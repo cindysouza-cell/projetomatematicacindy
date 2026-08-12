@@ -1,1 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Juros Compostos</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --success-color: #4ade80;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 550px;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--accent-color);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .formula-card {
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid var(--accent-color);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .formula-card h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-color);
+      margin-bottom: 6px;
+    }
+
+    .formula-expression {
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .formula-legend {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: #0f172a;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .results-container {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: none;
+    }
+
+    .results-container.active {
+      display: block;
+    }
+
+    .result-card {
+      background-color: var(--bg-color);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .result-card.highlight {
+      border-color: var(--success-color);
+      background: rgba(74, 222, 128, 0.05);
+    }
+
+    .result-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .result-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--text-main);
+    }
+
+    .result-card.highlight .result-value {
+      color: var(--success-color);
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+    <header>
+      <h1>Simulador Financeiro</h1>
+      <p>Cálculo de Juros Compostos e Montante</p>
+    </header>
+
+    <div class="formula-card">
+      <h3>Fórmula Aplicada</h3>
+      <div class="formula-expression">M = C · (1 + i)ᵗ</div>
+      <div class="formula-legend">
+        <span><b>M:</b> Montante</span>
+        <span><b>C:</b> Capital</span>
+        <span><b>i:</b> Taxa</span>
+        <span><b>t:</b> Tempo</span>
+      </div>
+    </div>
+
+    <form id="calculator-form">
+      <div class="form-group">
+        <label for="capital">Capital Inicial (C) - R$</label>
+        <input type="number" id="capital" placeholder="Ex: 1000" step="0.01" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="rate">Taxa de Juros ao Mês (i) - %</label>
+        <input type="number" id="rate" placeholder="Ex: 1.5" step="0.01" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="time">Período (t) - Em meses</label>
+        <input type="number" id="time" placeholder="Ex: 12" step="1" min="1" required>
+      </div>
+
+      <button type="submit">Calcular Rendimento</button>
+    </form>
+
+    <section class="results-container" id="results">
+      <div class="result-card highlight">
+        <div class="result-title">Montante Final (M)</div>
+        <div class="result-value" id="res-montante">R$ 0,00</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-title">Total Investido (C)</div>
+        <div class="result-value" id="res-investido">R$ 0,00</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-title">Total em Juros (J)</div>
+        <div class="result-value" id="res-juros">R$ 0,00</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('calculator-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Obter valores numéricos dos inputs
+      const capital = parseFloat(document.getElementById('capital').value);
+      const rate = parseFloat(document.getElementById('rate').value) / 100;
+      const time = parseInt(document.getElementById('time').value);
+
+      // Validação básica
+      if (isNaN(capital) || isNaN(rate) || isNaN(time)) return;
+
+      // Cálculo dos Juros Compostos: M = C * (1 + i)^t
+      const montante = capital * Math.pow((1 + rate), time);
+      const juros = montante - capital;
+
+      // Formatação em moeda brasileira (BRL)
+      const formatCurrency = (val) => {
+        return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      };
+
+      // Atualizar interface
+      document.getElementById('res-montante').innerText = formatCurrency(montante);
+      document.getElementById('res-investido').innerText = formatCurrency(capital);
+      document.getElementById('res-juros').innerText = formatCurrency(juros);
+
+      // Exibir o container de resultados
+      document.getElementById('results').classList.add('active');
+    });
+  </script>
+</body>
+</html>
